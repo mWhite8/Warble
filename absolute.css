@@ -1,0 +1,40 @@
+
+
+.goo {
+
+    position: absolute;
+    display: inline-block;
+    top: 0px;
+    left: 100px;
+    width: 500px;
+    height: 400px;
+
+}
+
+.par {
+
+    display: inline;
+    position: relative;
+    margin: 0px;
+    top: -50px;
+    left: 0px;
+}
+
+.abs {
+
+    display: inline;
+    position: relative;
+    top: 0px;
+    left: 0px;
+    width: 85px;
+    height: 64px;
+}
+
+.abs2 {
+
+    position: relative;
+    top: 170px;
+    left: 315px;
+    width: 85px;
+    height: 64px;
+}

@@ -1,0 +1,14 @@
+#toolbar {
+
+    position: fixed;
+    color: #ffffff;
+    background-color: #000000;
+    width: 100px;
+    height: 150px;
+    cursor: pointer;
+}
+
+.insert_img, .insert_text, .change_bg, .change_border {
+
+    display: block;
+}

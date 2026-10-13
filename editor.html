@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <title>Warble - Editor</title>
+        <link rel="stylesheet" href="editor.css">
+
+    </head>
+
+
+    <body>
+
+            <!-- 
+
+            the toolbar. Has a few buttons:
+                - insert image
+                - insert text box
+                - change bg
+                - change border
+
+            should start on the top left corner of the screen but be draggable.
+            Should be static; scrolls with the page.
+
+            -->
+
+
+            <div id="toolbar">
+
+                <button class="insert_img", onclick=> image </button>
+
+                <button class="insert_text"> text box </button>
+
+                <button class="change_bg"> background </button>
+
+                <button class="change_border"> border </button>
+
+                <button onclick="insertElement()"> test </button>
+
+            </div>
+
+            <div id="blank"> </div>
+
+            
+    </body>
+
+
+</html>
+
+<script src="editor.js"></script>
+
+<script>
+
+    function insertElement() {
+
+        const el = document.getElementById("blank");
+        el.insertAdjacentHTML("beforebegin", "<p> test </p>");
+
+    }
+
+</script>
