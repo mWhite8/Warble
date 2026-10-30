@@ -2,10 +2,28 @@
 
 let newX = 0, newY = 0, startX = 0, startY = 0;
 
-const card = document.getElementById('toolbar');
-card.addEventListener('mousedown', mouseDown);
+//const card = document.getElementById('toolbar');
+//card.addEventListener('mousedown', mouseDown);
+
+const cards = new Map();
+
+makeElementMovable("toolbar");
+
+function makeElementMovable(id) {
+
+	//const someInput = document.querySelector('button');
+
+	console.log(id);
+
+    const card = document.getElementById(id);
+    card.addEventListener('mousedown', mouseDown, false);
+    card.id = id;
+    cards.set(id, card);
+}
 
 function mouseDown(e) {
+
+	console.log(e.currentTarget.id);
 
     //set startX, startY to the positions of the toolbar
     startX = e.clientX;
@@ -14,6 +32,8 @@ function mouseDown(e) {
     //listen for mousemove and mouseup events
     document.addEventListener('mousemove', mouseMove);
     document.addEventListener('mouseup', mouseUp);
+    
+    document.curId = e.currentTarget.id;
 }
 
 function mouseMove(e) {
@@ -27,8 +47,9 @@ function mouseMove(e) {
     startY = e.clientY;
 
     //set the positions
-    card.style.top = (card.offsetTop - newY) + 'px';
-    card.style.left = (card.offsetLeft - newX) + 'px';
+    //looks like a mess but "cards.get(e.currentTarget.curId)" is referring to the card that is being moved
+    cards.get(e.currentTarget.curId).style.top = (cards.get(e.currentTarget.curId).offsetTop - newY) + 'px';
+    cards.get(e.currentTarget.curId).style.left = (cards.get(e.currentTarget.curId).offsetLeft - newX) + 'px';
 
     /*
     console.log({newX, newY});
