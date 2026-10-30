@@ -1,3 +1,4 @@
+//for functions mouseDown, mouseMove, mouseUp,
 //source: Appwrite, https://youtu.be/ymDjvycjgUM
 
 let newX = 0, newY = 0, startX = 0, startY = 0;
@@ -5,25 +6,40 @@ let newX = 0, newY = 0, startX = 0, startY = 0;
 //const card = document.getElementById('toolbar');
 //card.addEventListener('mousedown', mouseDown);
 
+numElements = 0;
 const cards = new Map();
 
 makeElementMovable("toolbar");
+
+function insertElement() {
+
+    //html element as a string
+    el_str = '<div id="' + numElements + '"> test </div>';
+
+    const el = document.getElementById("blank");
+    el.insertAdjacentHTML("beforebegin", el_str);
+
+    makeElementMovable(numElements.toString());
+    numElements++;
+}
 
 function makeElementMovable(id) {
 
 	//const someInput = document.querySelector('button');
 
-	console.log(id);
+	//console.log(id);
 
     const card = document.getElementById(id);
     card.addEventListener('mousedown', mouseDown, false);
     card.id = id;
+    card.style.position = "fixed";
+    card.style.color = "#000000";
     cards.set(id, card);
 }
 
 function mouseDown(e) {
 
-	console.log(e.currentTarget.id);
+	//console.log(e.currentTarget.id);
 
     //set startX, startY to the positions of the toolbar
     startX = e.clientX;
@@ -45,6 +61,9 @@ function mouseMove(e) {
     //new start position
     startX = e.clientX;
     startY = e.clientY;
+
+    console.log(cards.get(e.currentTarget.curId));
+	//console.log(e.currentTarget.id);
 
     //set the positions
     //looks like a mess but "cards.get(e.currentTarget.curId)" is referring to the card that is being moved
