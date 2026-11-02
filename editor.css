@@ -6,9 +6,25 @@
     width: 100px;
     height: 150px;
     cursor: pointer;
+    user-select: none;
 }
 
 .insert_img, .insert_text, .change_bg, .change_border {
 
     display: block;
+}
+
+.testimg {
+
+  user-drag: none;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+body {
+
+	background-image: url(images/background.jpg);
 }

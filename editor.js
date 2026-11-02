@@ -18,6 +18,7 @@ function insertElement(type) {
 		imgNode.src = "images/pretty.jpg";
 		imgNode.height = 100;
 		imgNode.width = 100;
+		imgNode.style.draggable = false;
 		newNode.appendChild(imgNode);
 	}
 	
@@ -28,7 +29,7 @@ function insertElement(type) {
 	
 	else { newNode.appendChild(document.createTextNode("text node")); }
 	newNode.id = numElements.toString();
-	
+	newNode.style["userSelect"] = "none";
 
 
     //html element as a string
@@ -43,6 +44,13 @@ function insertElement(type) {
     makeElementMovable(numElements.toString());
     numElements++;
 }
+
+function changeBackground() {
+
+    body = document.getElementById("theBody");
+    body.style["background-image"] = "url(images/kirby.png)";
+}
+
 
 function makeElementMovable(id) {
 
