@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>User Account</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f2f4f8; display: flex; justify-content: center; padding: 40px; }
+    .card { background: #fff; padding: 24px; border-radius: 10px; width: 340px; box-shadow: 0 2px 10px rgba(0,0,0,.1); }
+    input, button { width: 100%; padding: 10px; margin: 6px 0; box-sizing: border-box; }
+    button { background: #3b82f6; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+    button.secondary { background: #6b7280; }
+    button.danger { background: #ef4444; }
+    .msg { margin-top: 10px; font-size: 14px; }
+    .error { color: #dc2626; }
+    .success { color: #16a34a; }
+    .hidden { display: none; }
+    a { color: #3b82f6; cursor: pointer; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <!-- Register -->
+    <div id="registerView">
+      <h2>Create Account</h2>
+      <input id="regUsername" placeholder="Username" />
+      <input id="regEmail" type="email" placeholder="Email" />
+      <input id="regPassword" type="password" placeholder="Password (min 8 chars)" />
+      <button onclick="register()">Register</button>
+      <a onclick="showView('loginView')">Already have an account? Log in</a>
+    </div>
+
+    <!-- Login -->
+    <div id="loginView" class="hidden">
+      <h2>Log In</h2>
+      <input id="loginUsername" placeholder="Username or Email" />
+      <input id="loginPassword" type="password" placeholder="Password" />
+      <button onclick="login()">Log In</button>
+      <a onclick="showView('registerView')">Need an account? Register</a>
+    </div>
+
+    <!-- Profile -->
+    <div id="profileView" class="hidden">
+      <h2>My Profile</h2>
+      <p><strong>Username:</strong> <span id="pUsername"></span></p>
+      <p><strong>Email:</strong> <span id="pEmail"></span></p>
+      <p><strong>Joined:</strong> <span id="pCreated"></span></p>
+
+      <h4>Update Profile</h4>
+      <input id="newUsername" placeholder="New username" />
+      <input id="newEmail" type="email" placeholder="New email" />
+      <button onclick="updateProfile()">Save Changes</button>
+
+      <h4>Change Password</h4>
+      <input id="oldPassword" type="password" placeholder="Old password" />
+      <input id="newPassword" type="password" placeholder="New password" />
+      <button onclick="changePassword()">Change Password</button>
+
+      <button class="secondary" onclick="logout()">Log Out</button>
+      <button class="danger" onclick="deleteAccount()">Delete Account</button>
+    </div>
+
+    <div id="message" class="msg"></div>
+  </div>
+
+  <script>
+    // ---------- Storage helpers ----------
+    const getUsers = () => JSON.parse(localStorage.getItem("users") || "[]");
+    const saveUsers = (users) => localStorage.setItem("users", JSON.stringify(users));
+    const getSession = () => localStorage.getItem("sessionUser");
+
+    // ---------- Password hashing (SHA-256 with salt) ----------
+    async function hashPassword(password, salt) {
+      const data = new TextEncoder().encode(salt + password);
+      const buffer = await crypto.subtle.digest("SHA-256", data);
+      return Array.from(new Uint8Array(buffer))
+        .map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    function generateSalt() {
+      const arr = crypto.getRandomValues(new Uint8Array(16));
+      return Array.from(arr).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    // ---------- UI helpers ----------
+    function showMessage(text, type = "error") {
+      const el = document.getElementById("message");
+      el.textContent = text;
+      el.className = "msg " + type;
+    }
+
+    function showView(id) {
+      ["registerView", "loginView", "profileView"].forEach(v =>
+        document.getElementById(v).classList.add("hidden"));
+      document.getElementById(id).classList.remove("hidden");
+      showMessage("");
+    }
+
+    function validatePassword(pw) {
+      if (pw.length < 8) return "Password must be at least 8 characters";
+      if (!/\d/.test(pw)) return "Password must contain a number";
+      if (!/[A-Za-z]/.test(pw)) return "Password must contain a letter";
+      return null;
+    }
+
+    const emailValid = (e) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e);
+
+    // ---------- Account functions ----------
+    async function register() {
+      const username = regUsername.value.trim();
+      const email = regEmail.value.trim().toLowerCase();
+      const password = regPassword.value;
+
+      if (!username || !email || !password) return showMessage("All fields are required");
+      if (!emailValid(email)) return showMessage("Invalid email address");
+      const pwError = validatePassword(password);
+      if (pwError) return showMessage(pwError);
+
+      const users = getUsers();
+      if (users.some(u => u.username === username)) return showMessage("Username already taken");
+      if (users.some(u => u.email === email)) return showMessage("Email already registered");
+
+      const salt = generateSalt();
+      const passwordHash = await hashPassword(password, salt);
+
+      users.push({ id: Date.now(), username, email, salt, passwordHash, createdAt: new Date().toISOString() });
+      saveUsers(users);
+
+      showView("loginView");
+      showMessage("Account created! Please log in.", "success");
+    }
+
+    async function login() {
+      const id = loginUsername.value.trim();
+      const password = loginPassword.value;
+
+      const user = getUsers().find(u => u.username === id || u.email === id.toLowerCase());
+      if (!user) return showMessage("Invalid credentials");
+
+      const hash = await hashPassword(password, user.salt);
+      if (hash !== user.passwordHash) return showMessage("Invalid credentials");
+
+      localStorage.setItem("sessionUser", user.id);
+      loadProfile();
+    }
+
+    function logout() {
+      localStorage.removeItem("sessionUser");
+      showView("loginView");
+      showMessage("Logged out", "success");
+    }
+
+    function loadProfile() {
+      const user = getUsers().find(u => String(u.id) === getSession());
+      if (!user) return showView("loginView");
+
+      pUsername.textContent = user.username;
+      pEmail.textContent = user.email;
+      pCreated.textContent = new Date(user.createdAt).toLocaleString();
+      showView("profileView");
+    }
+
+    function updateProfile() {
+      const users = getUsers();
+      const user = users.find(u => String(u.id) === getSession());
+      const username = newUsername.value.trim();
+      const email = newEmail.value.trim().toLowerCase();
+
+      if (username && username !== user.username) {
+        if (users.some(u => u.username === username)) return showMessage("Username already taken");
+        user.username = username;
+      }
+      if (email && email !== user.email) {
+        if (!emailValid(email)) return showMessage("Invalid email address");
+        if (users.some(u => u.email === email)) return showMessage("Email already registered");
+        user.email = email;
+      }
+
+      saveUsers(users);
+      loadProfile();
+      showMessage("Profile updated", "success");
+    }
+
+    async function changePassword() {
+      const users = getUsers();
+      const user = users.find(u => String(u.id) === getSession());
+
+      const oldHash = await hashPassword(oldPassword.value, user.salt);
+      if (oldHash !== user.passwordHash) return showMessage("Old password is incorrect");
+
+      const pwError = validatePassword(newPassword.value);
+      if (pwError) return showMessage(pwError);
+
+      user.salt = generateSalt();
+      user.passwordHash = await hashPassword(newPassword.value, user.salt);
+      saveUsers(users);
+
+      oldPassword.value = newPassword.value = "";
+      showMessage("Password changed", "success");
+    }
+
+    function deleteAccount() {
+      if (!confirm("Delete your account permanently?")) return;
+      saveUsers(getUsers().filter(u => String(u.id) !== getSession()));
+      localStorage.removeItem("sessionUser");
+      showView("registerView");
+      showMessage("Account deleted", "success");
+    }
+
+    // ---------- Init ----------
+    getSession() ? loadProfile() : showView("registerView");
+  </script>
+</body>
+</html>
