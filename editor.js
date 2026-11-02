@@ -2,22 +2,43 @@
 //source: Appwrite, https://youtu.be/ymDjvycjgUM
 
 let newX = 0, newY = 0, startX = 0, startY = 0;
-
-//const card = document.getElementById('toolbar');
-//card.addEventListener('mousedown', mouseDown);
-
 numElements = 0;
 const cards = new Map();
 
 makeElementMovable("toolbar");
 
-function insertElement() {
+function insertElement(type) {
+
+	//'type' can be "image" or "text". Both are stored in a div but gotta handle them both
+	
+	let newNode = document.createElement('div');
+	if (type == "image") {
+		
+		imgNode = document.createElement('img');
+		imgNode.src = "images/pretty.jpg";
+		imgNode.height = 100;
+		imgNode.width = 100;
+		newNode.appendChild(imgNode);
+	}
+	
+	else if (type == "text") {
+		
+		//newNode = document.createElement('text');
+	}
+	
+	else { newNode.appendChild(document.createTextNode("text node")); }
+	newNode.id = numElements.toString();
+	
+
 
     //html element as a string
     el_str = '<div id="' + numElements + '"> test </div>';
 
     const el = document.getElementById("blank");
-    el.insertAdjacentHTML("beforebegin", el_str);
+    //el.insertAdjacentHTML("beforebegin", el_str);
+    
+    
+	el.appendChild(newNode);
 
     makeElementMovable(numElements.toString());
     numElements++;
@@ -62,11 +83,8 @@ function mouseMove(e) {
     startX = e.clientX;
     startY = e.clientY;
 
-    console.log(cards.get(e.currentTarget.curId));
-	//console.log(e.currentTarget.id);
-
     //set the positions
-    //looks like a mess but "cards.get(e.currentTarget.curId)" is referring to the card that is being moved
+    //looks like a mess but "cards.get(e.currentTarget.curId)" is just referring to the card (element) that is being moved
     cards.get(e.currentTarget.curId).style.top = (cards.get(e.currentTarget.curId).offsetTop - newY) + 'px';
     cards.get(e.currentTarget.curId).style.left = (cards.get(e.currentTarget.curId).offsetLeft - newX) + 'px';
 
